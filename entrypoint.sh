@@ -3,12 +3,18 @@
 # gitlab-runner data directory
 DATA_DIR="/etc/gitlab-runner"
 CONFIG_FILE=${CONFIG_FILE:-$DATA_DIR/config.toml}
+TMPL_CONFIG_FILE=${TMPL_CONFIG_FILE:-$DATA_DIR/runner.toml}
 # custom certificate authority path
 CA_CERTIFICATES_PATH=${CA_CERTIFICATES_PATH:-$DATA_DIR/certs/ca.crt}
 LOCAL_CA_PATH="/usr/local/share/ca-certificates/ca.crt"
-
+if [[ "X${GITLAB_RUNNER_NAME}" == "X" ]];then
+    GITLAB_RUNNER_NAME=$(hostname)
+fi
 if [[ "X${GITLAB_TOKEN}" != "X" ]];then
-    sed -i'' -e 's/token = "TOKEN".*/token = '"\"${GITLAB_TOKEN}\""'/' ${CONFIG_FILE} 
+    gitlab-runner register --non-interactive --executor=docker \
+        --url https://gitlab --registration-token ${GITLAB_TOKEN} \
+        --docker-image=alpine:3.8 --docker-host=unix:///var/run/docker.sock \
+        --docker-network-mode=host
 fi
 
 update_ca() {
