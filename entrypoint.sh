@@ -14,7 +14,8 @@ if [[ "X${GITLAB_TOKEN}" != "X" ]];then
     gitlab-runner register --non-interactive --executor=docker \
         --url https://gitlab --registration-token ${GITLAB_TOKEN} \
         --docker-image=alpine:3.8 --docker-host=unix:///var/run/docker.sock \
-        --docker-network-mode=host
+        --docker-network-mode=host --docker-volumes=/var/run/docker.sock:/var/run/docker.sock \
+        --docker-volumes=/cache
 fi
 
 update_ca() {
